@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp-argo-application
+  namespace: argocd
+spec:
+  project: default #is the project name in argocd
+
+  source:
+    repoURL: https://github.com/guilhermealegre/argocd-app-config.git
+    targetRevision: HEAD #is the last commit in the repo
+    path: dev #is the path to the files in the repo
+  destination: 
+    server: https://kubernetes.default.svc #In our case, our destination cluster is the same as where argocd id deployed so we can use dns name
+    #kubernetes.default.svc is a internal service name of kubernetes api server 
+    namespace: myapp #is the namespace in the cluster
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      #by default, changes made to the live cluster will not will not trigger automated sync
+      #we can enable with selfHeal options 
+      selfHeal: true 
+      prune: true #prune is used to remove resources that are no longer present in the source code
+      #by default, automatic sync will not delete resources that are no longer present in the source code
